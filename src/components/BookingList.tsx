@@ -32,7 +32,7 @@ export default function BookingList({ airports }: Props) {
       }
     } catch (err) {
       logError("BookingList - loadMore", err);
-      setErrorMessage(" Failed to fetch bookings. Please try again later.");
+      setErrorMessage("Failed to fetch bookings. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -61,7 +61,7 @@ export default function BookingList({ airports }: Props) {
 
   return (
     <>
-      <div className="table-container" onScroll={handleScroll}>
+      <div className="table-container">
         <h2 className="table-header">All Bookings</h2>
 
         {errorMessage && (
@@ -70,65 +70,79 @@ export default function BookingList({ airports }: Props) {
           </div>
         )}
 
-        <table className="booking-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>From</th>
-              <th>To</th>
-              <th>Dates</th>
-              <th></th>
-            </tr>
-          </thead>
+        {/* Scrollable area */}
+        <div className="table-scroll" onScroll={handleScroll}>
+          <table className="booking-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Dates</th>
+                <th></th>
+              </tr>
+            </thead>
 
-          <tbody>
-            {bookings.map((b) => {
-              const from = airports.find((a) => a.id === b.departureAirportId);
-              const to = airports.find((a) => a.id === b.arrivalAirportId);
+            <tbody>
+              {bookings.map((b) => {
+                const from = airports.find(
+                  (a) => a.id === b.departureAirportId
+                );
+                const to = airports.find((a) => a.id === b.arrivalAirportId);
 
-              return (
-                <tr
-                  key={b.id}
-                  onClick={() => setSelectedBooking(b)}
-                  className="booking-row"
-                >
-                  <td>{b.id}</td>
-                  <td>
-                    {b.firstName} {b.lastName}
-                  </td>
-                  <td>
-                    {from
-                      ? `${from.title} (${from.code})`
-                      : `#${b.departureAirportId}`}
-                  </td>
-                  <td>
-                    {to ? `${to.title} (${to.code})` : `#${b.arrivalAirportId}`}
-                  </td>
-                  <td>
-                    {b.departureDate.slice(0, 10)} → {b.returnDate.slice(0, 10)}
-                  </td>
-                  <td>
-                    <button
-                      className="delete-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(b.id);
-                      }}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                return (
+                  <tr
+                    key={b.id}
+                    onClick={() => setSelectedBooking(b)}
+                    className="booking-row"
+                  >
+                    <td>{b.id}</td>
+                    <td>
+                      {b.firstName} {b.lastName}
+                    </td>
+                    <td>
+                      {from
+                        ? `${from.title} (${from.code})`
+                        : `#${b.departureAirportId}`}
+                    </td>
+                    <td>
+                      {to
+                        ? `${to.title} (${to.code})`
+                        : `#${b.arrivalAirportId}`}
+                    </td>
+                    <td>
+                      {b.departureDate.slice(0, 10)} →{" "}
+                      {b.returnDate.slice(0, 10)}
+                    </td>
+                    <td>
+                      <button
+                        className="delete-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(b.id);
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
 
-        {loading && <p className="end-text">Loading more...</p>}
-        {!hasMore && !loading && (
-          <p className="end-text">No more bookings to load.</p>
-        )}
+        {/* ✨ Dynamic footer */}
+        <div className="table-footer-status">
+          Showing <strong>{bookings.length}</strong> booking
+          {bookings.length !== 1 && "s"}
+          {loading
+            ? " — loading more..."
+            : hasMore
+            ? " — scroll to load more"
+            : " — all loaded!"}
+        </div>
       </div>
 
       {selectedBooking && (
