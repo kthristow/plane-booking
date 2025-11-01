@@ -3,6 +3,7 @@ import { getBookings, deleteBooking } from "../api/bookingsApi";
 import type { Booking } from "../types/Booking";
 import type { Airport } from "../types/Airport";
 import BookingModal from "./BookingModal";
+import { logError } from "../common/errorLogger";
 
 interface Props {
   airports: Airport[];
@@ -14,10 +15,12 @@ export default function BookingList({ airports }: Props) {
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   async function loadMore() {
     if (loading || !hasMore) return;
     setLoading(true);
+    setErrorMessage(null);
 
     try {
       const data = await getBookings(pageIndex);
@@ -28,7 +31,8 @@ export default function BookingList({ airports }: Props) {
         setHasMore(false);
       }
     } catch (err) {
-      console.error("Failed to fetch bookings:", err);
+      logError("BookingList - loadMore", err);
+      setErrorMessage(" Failed to fetch bookings. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -40,11 +44,13 @@ export default function BookingList({ airports }: Props) {
   }, []);
 
   async function handleDelete(id: number) {
+    setErrorMessage(null);
     try {
       await deleteBooking(id);
       setBookings((prev) => prev.filter((b) => b.id !== id));
     } catch (err) {
-      console.error("Failed to delete booking:", err);
+      logError("BookingList → handleDelete", err);
+      setErrorMessage(`⚠️ Failed to delete booking #${id}. Try again.`);
     }
   }
 
@@ -57,6 +63,12 @@ export default function BookingList({ airports }: Props) {
     <>
       <div className="table-container" onScroll={handleScroll}>
         <h2 className="table-header">All Bookings</h2>
+
+        {errorMessage && (
+          <div className="error-banner" style={{ marginBottom: "1rem" }}>
+            {errorMessage}
+          </div>
+        )}
 
         <table className="booking-table">
           <thead>
@@ -114,7 +126,9 @@ export default function BookingList({ airports }: Props) {
         </table>
 
         {loading && <p className="end-text">Loading more...</p>}
-        {!hasMore && <p className="end-text">No more bookings to load.</p>}
+        {!hasMore && !loading && (
+          <p className="end-text">No more bookings to load.</p>
+        )}
       </div>
 
       {selectedBooking && (
