@@ -50,7 +50,7 @@ export default function BookingList({ airports }: Props) {
       setBookings((prev) => prev.filter((b) => b.id !== id));
     } catch (err) {
       logError("BookingList → handleDelete", err);
-      setErrorMessage(`⚠️ Failed to delete booking #${id}. Try again.`);
+      setErrorMessage(`Failed to delete booking #${id}. Try again.`);
     }
   }
 
