@@ -1,0 +1,35 @@
+:root {
+  /* ===== Base ===== */
+  --color-bg: #f7f8fa;
+  --color-text: #333;
+  --color-heading: #222;
+  --color-subtext: #444;
+
+  /* ===== Primary ===== */
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+
+  /* ===== Surfaces ===== */
+  --color-surface: #ffffff;
+  --color-surface-alt: #f0f3f8;
+  --color-row-even: #fafafa;
+  --color-row-hover: #e8f0fe;
+
+  /* ===== Borders & Shadows ===== */
+  --color-border: #ccc;
+  --color-border-light: #e5e7eb;
+  --color-shadow: rgba(0, 0, 0, 0.1);
+
+  /* ===== Errors ===== */
+  --color-error: #dc2626;
+  --color-error-bg: #fee2e2;
+
+  /* ===== Buttons ===== */
+  --color-delete: #dc3545;
+  --color-delete-hover: #b91c1c;
+
+  /* ===== Scrollbar ===== */
+  --color-scrollbar-thumb: #c5c5c5;
+  --color-scrollbar-thumb-hover: #9b9b9b;
+  --color-scrollbar-track: #f1f1f1;
+}
