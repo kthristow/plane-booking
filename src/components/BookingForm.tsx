@@ -17,83 +17,54 @@ export default function BookingForm({ onCreated, airports }: Props) {
     returnDate: "",
   });
 
-  const [errors, setErrors] = useState({
-    firstName: "",
-    lastName: "",
-    departureAirportId: "",
-    arrivalAirportId: "",
-    departureDate: "",
-    returnDate: "",
-    dateValidation: "",
-  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [successMessage, setSuccessMessage] = useState("");
 
-  const resetErrors = () =>
-    setErrors({
-      firstName: "",
-      lastName: "",
-      departureAirportId: "",
-      arrivalAirportId: "",
-      departureDate: "",
-      returnDate: "",
-      dateValidation: "",
-    });
-
-  const validateForm = () => {
-    const newErrors = {
-      firstName: "",
-      lastName: "",
-      departureAirportId: "",
-      arrivalAirportId: "",
-      departureDate: "",
-      returnDate: "",
-      dateValidation: "",
-    };
-
-    if (!form.firstName.trim()) newErrors.firstName = "First name is required.";
-    if (!form.lastName.trim()) newErrors.lastName = "Last name is required.";
-    if (form.departureAirportId === 0)
-      newErrors.departureAirportId = "Please select a departure airport.";
-    if (form.arrivalAirportId === 0)
-      newErrors.arrivalAirportId = "Please select an arrival airport.";
-    if (!form.departureDate)
-      newErrors.departureDate = "Please choose a departure date.";
-    if (!form.returnDate) newErrors.returnDate = "Please choose a return date.";
-
-    if (form.departureDate && form.returnDate) {
-      const dep = new Date(form.departureDate);
-      const ret = new Date(form.returnDate);
-      if (ret < dep)
-        newErrors.dateValidation =
-          "Return date must be after the departure date.";
-    }
-
-    // Check same airport rule
-    if (
-      form.departureAirportId !== 0 &&
-      form.arrivalAirportId !== 0 &&
-      form.departureAirportId === form.arrivalAirportId
-    ) {
-      newErrors.dateValidation =
-        "Departure and arrival airports must be different.";
-    }
-
-    return newErrors;
+  const handleChange = (
+    field: keyof typeof form,
+    value: string | number
+  ): void => {
+    setForm({ ...form, [field]: value });
+    setErrors((prev) => ({ ...prev, [field]: "" }));
+    setSuccessMessage(""); // clear success on change
   };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    resetErrors();
+    const newErrors: Record<string, string> = {};
+    setSuccessMessage("");
 
-    const newErrors = validateForm();
-    const hasErrors = Object.values(newErrors).some((v) => v !== "");
+    if (!form.firstName) newErrors.firstName = "First name is required.";
+    if (!form.lastName) newErrors.lastName = "Last name is required.";
+    if (!form.departureAirportId)
+      newErrors.departureAirportId = "Please select a departure airport.";
+    if (!form.arrivalAirportId)
+      newErrors.arrivalAirportId = "Please select an arrival airport.";
+    if (
+      form.departureAirportId &&
+      form.arrivalAirportId &&
+      form.departureAirportId === form.arrivalAirportId
+    )
+      newErrors.arrivalAirportId =
+        "Departure and arrival airports must differ.";
+    if (!form.departureDate)
+      newErrors.departureDate = "Please choose a departure date.";
+    if (!form.returnDate) newErrors.returnDate = "Please choose a return date.";
+    if (
+      form.departureDate &&
+      form.returnDate &&
+      new Date(form.returnDate) < new Date(form.departureDate)
+    )
+      newErrors.returnDate = "Return date must be after departure date.";
 
-    if (hasErrors) {
+    if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
 
     try {
       await createBooking(form);
+      setSuccessMessage("✅ Booking created successfully!");
       setForm({
         firstName: "",
         lastName: "",
@@ -103,27 +74,16 @@ export default function BookingForm({ onCreated, airports }: Props) {
         returnDate: "",
       });
       onCreated();
-    } catch (err) {
-      console.error("Failed to create booking:", err);
-      setErrors((prev) => ({
-        ...prev,
-        dateValidation: "Something went wrong while creating the booking.",
-      }));
+    } catch {
+      setErrors({
+        global: "Something went wrong while creating your booking.",
+      });
     }
   }
-
-  const handleChange = <K extends keyof typeof form>(
-    field: K,
-    value: (typeof form)[K]
-  ) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => ({ ...prev, [field]: "" }));
-  };
 
   return (
     <form className="form" onSubmit={handleSubmit}>
       <h2>Create Booking</h2>
-
       <div className="form-group">
         <input
           type="text"
@@ -131,9 +91,10 @@ export default function BookingForm({ onCreated, airports }: Props) {
           value={form.firstName}
           onChange={(e) => handleChange("firstName", e.target.value)}
         />
-        {errors.firstName && <p className="error-text">{errors.firstName}</p>}
+        {errors.firstName && (
+          <div className="error-text">{errors.firstName}</div>
+        )}
       </div>
-
       <div className="form-group">
         <input
           type="text"
@@ -141,9 +102,8 @@ export default function BookingForm({ onCreated, airports }: Props) {
           value={form.lastName}
           onChange={(e) => handleChange("lastName", e.target.value)}
         />
-        {errors.lastName && <p className="error-text">{errors.lastName}</p>}
+        {errors.lastName && <div className="error-text">{errors.lastName}</div>}
       </div>
-
       <div className="form-group">
         <label>Departure Airport:</label>
         <select
@@ -160,7 +120,7 @@ export default function BookingForm({ onCreated, airports }: Props) {
           ))}
         </select>
         {errors.departureAirportId && (
-          <p className="error-text">{errors.departureAirportId}</p>
+          <div className="error-text">{errors.departureAirportId}</div>
         )}
       </div>
 
@@ -180,10 +140,9 @@ export default function BookingForm({ onCreated, airports }: Props) {
           ))}
         </select>
         {errors.arrivalAirportId && (
-          <p className="error-text">{errors.arrivalAirportId}</p>
+          <div className="error-text">{errors.arrivalAirportId}</div>
         )}
       </div>
-
       <div className="form-group">
         <label>Departure Date:</label>
         <input
@@ -192,10 +151,9 @@ export default function BookingForm({ onCreated, airports }: Props) {
           onChange={(e) => handleChange("departureDate", e.target.value)}
         />
         {errors.departureDate && (
-          <p className="error-text">{errors.departureDate}</p>
+          <div className="error-text">{errors.departureDate}</div>
         )}
       </div>
-
       <div className="form-group">
         <label>Return Date:</label>
         <input
@@ -203,14 +161,14 @@ export default function BookingForm({ onCreated, airports }: Props) {
           value={form.returnDate}
           onChange={(e) => handleChange("returnDate", e.target.value)}
         />
-        {errors.returnDate && <p className="error-text">{errors.returnDate}</p>}
+        {errors.returnDate && (
+          <div className="error-text">{errors.returnDate}</div>
+        )}
       </div>
 
-      {errors.dateValidation && (
-        <p className="error-text form-bottom-error">{errors.dateValidation}</p>
-      )}
-
       <button type="submit">Book Flight</button>
+      {errors.global && <div className="error-banner">{errors.global}</div>}
+      {successMessage && <div className="success-banner">{successMessage}</div>}
     </form>
   );
 }

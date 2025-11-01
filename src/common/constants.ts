@@ -1,2 +1,2 @@
-export const BASE_URL = "https://interview.fio.de/core-frontend/api";
-export const TOKEN = "Ubdn5YlvfCbNvAiGzWwL9vVtgGIQqV";
+export const BASE_URL = import.meta.env.VITE_BASE_URL;
+export const TOKEN = import.meta.env.VITE_API_TOKEN;

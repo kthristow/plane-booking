@@ -229,6 +229,17 @@ select:invalid {
   gap: 0.5rem;
 }
 
+.success-banner {
+  background-color: #dcfce7; /* light green */
+  border: 1px solid #86efac; /* soft green border */
+  color: #166534; /* deep green text */
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  text-align: center;
+  margin-top: 1rem;
+}
+
 /* ===== Modal ===== */
 .modal-overlay {
   position: fixed;
